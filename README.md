@@ -3,7 +3,9 @@ This project is to get last-readings from deployed Smart-Citizen sensors and sto
 It also allows querying the data from already created mongodb
 
 The code depends on the following:
+
 -Smart Citizen API (http://developer.smartcitizen.me/) 
+
 -Python Mongodb module (pymongo)
 
 Note:
