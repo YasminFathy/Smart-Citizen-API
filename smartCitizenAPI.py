@@ -6,9 +6,6 @@ import dateutil.parser
 import datetime
 from pymongo import MongoClient
 __author__ = "Yasmin Fathy (Fathy.Yasmin@gmail.com)"
-# Smart Citizen API (http://developer.smartcitizen.me/)
-# resource = sc-sics-sc-001-temp
-# device = sc-sics-sc-001
 
 
 class smartCitizen(object):
@@ -60,22 +57,16 @@ class smartCitizen(object):
 
 	def get_last_readings_sensors(self, devices_ids):
 		try:
-			#id = 1
-			#devices_ids=[3710, 3667]
 			for device_id in devices_ids:
 				response = requests.get(constants.DEVICE_LAST_READINGS_ACCESS_URL+str(device_id))
 				# check if data is retrieved successfully
 				if response.status_code == 200:
-					#deviceID = constants.DEVICE_PREFIX +"{0:0=3d}".format(id)
 					deviceID = constants.DEVICE_ID_DICT[str(device_id)]
 					response_json = response.json()
-					#print("last readings")
-					#print(response_json["last_reading_at"])
 					date_timestamp = response_json["last_reading_at"]
 					if date_timestamp == None:
 						date_timestamp = datetime.datetime.now().__str__()
 					self._format_data(response_json["data"]["sensors"],date_timestamp,deviceID)
-					#id += 1
 			# Run function continuously after 5 seconds
 			threading.Timer(constants.TIME_INTERVAL, self.get_last_readings_sensors(devices_ids)).start()
 		except Exception as ex:
@@ -96,8 +87,6 @@ class smartCitizen(object):
 				# if deviceID collection exists, just add the observation
 				else:
 					self.db_smartcitizen[deviceID].insert(observations)
-				#print("observations")
-				#print(observations)
 			else:
 				print("There is a problem in connecting to db_smartcitizen")
 		except Exception as ex:
@@ -118,27 +107,23 @@ class smartCitizen(object):
 					print("Another resource is associated with the given resourceID")
 			else:
 				print("There is a problem in connecting to self.db_smartcitizen.ResourceRegistry")
-			#print("ResourcesStaticData")
-			#print(resourceStaticData)
 		except Exception as ex:
 				print(ex)
 				raise
 
 	def _format_data(self, json_reponse_sensors, time_stamp,device_id):
 		try:
-			#print(time_stamp)
 			dicts_resource = [] 		# resource = sc-sics-sc-001-temp
 			dicts_observation = []  	    # device = sc-sics-sc-001
 			ISO_time = time_stamp
 			UTC_time = dateutil.parser.parse(ISO_time)
 			last_reasing_timestamp = UTC_time.__str__()
-			#print(UTC_time)
 			for resource in json_reponse_sensors:
 				desc = resource['description']
 				if desc in constants.SENSOR_LST_DESCRIPTION:
 					idx = constants.SENSOR_LST_DESCRIPTION.index(desc)
 					short_name = constants.SENSOR_LST_DESCRIPTION_SHORTNAMES[idx]
-					# prepare the dict for this element/sensor
+					# prepare the dict for this resource/observation
 					dict_resource = constants.RESOURCE_DICT
 					dict_observation = constants.OBSERVATIONS_DICT
 
@@ -146,13 +131,11 @@ class smartCitizen(object):
 					resource_id=device_id+"-"+short_name
 					dict_resource["deviceId"] = device_id
 					dict_resource["resourceId"] = resource_id
-					#dict_resource["unit"] = resource['unit']
 					dict_resource["unit"] = constants.SENSOR_LIST_UNITS[idx]
 					dict_resource["qk"] = constants.SENSOR_LST_DESCRIPTION_SHORTNAMES_QK[idx]
 					self._write_resource_to_db(resource_id,dict(dict_resource))
 
 					dict_observation["dataValue"] = resource['value']
-					#dict_observation["timestamp"] = resource['updated_at']
 					dict_observation["timestamp"] = last_reasing_timestamp
 					dict_observation["resourceId"] = device_id+"-"+short_name
 
@@ -173,8 +156,6 @@ class smartCitizen(object):
 		try:
 			if self.db_smartcitizen is not None:
 				deviceID = resource_Id.rsplit('-', 1)[0]
-				#print("deviceID")
-				#print(deviceID)
 				deviceID_collection = self.db_smartcitizen[deviceID]
 				cursor_device = deviceID_collection.find({"resourceId": resource_Id, "timestamp": time_stamp})
 				cursor_resource = self.db_smartcitizen_resourceregistry_collection.find({"resourceId": resource_Id})
@@ -187,7 +168,6 @@ if __name__ == '__main__':
 	smartcitizen_obj = smartCitizen(constants.API_URL,constants.ACCESS_TOKEN)
 	# get list of devices' IDs associated with the current authorized user
 	devices_ids = smartcitizen_obj.get_devices_ids()
-	#print(devices_ids)
 
 	smartcitizen_obj.get_last_readings_sensors(devices_ids)
 	# get data from mongodb by resourceID and timestamp
