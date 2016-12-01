@@ -9,4 +9,5 @@ The code depends on the following:
 -Python Mongodb module (pymongo)
 
 Note:
+
 The data is stored using specific keys which are defiend in the constants.py
