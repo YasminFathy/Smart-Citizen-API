@@ -10,4 +10,4 @@ The code depends on the following:
 
 Note:
 
-The data is stored using specific keys which are defiend in the constants.py
+The data is stored in json format using specific keys which are defiend in the constants.py
