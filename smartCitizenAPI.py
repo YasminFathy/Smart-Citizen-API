@@ -12,8 +12,7 @@ class smartCitizen(object):
 	def __init__(self, url, access_token, drop_db=False):
 		self.access_token = access_token
 		self.response = self.get_response(url)
-		# set current directory to store downloaded files
-		os.chdir(constants.DATA_DIRECTORY)
+		# initialise mongodb access
 		db_client = MongoClient(constants.MONGO_DB_ACCESS)
 
 		# if drop_db, drop the existing db and create a new one
